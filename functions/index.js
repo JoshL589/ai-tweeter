@@ -13,13 +13,17 @@ const twitterClient = new TwitterApi({
 const callbackURL =
   "http://localhost:5000/twitter-tweeter-3cc43/us-central1/callback";
 
-exports.auth = functions.https.onRequest((request, response) => {
+exports.auth = functions.https.onRequest(async (request, response) => {
   const { url, codeVerifier, state } = twitterClient.generateOAuth2AuthLink(
     callbackURL,
     {
       scope: ["tweet.read", "tweet.write", "users.read", "offline.access"],
     }
   );
+
+  await dbRef.set({ codeVerifier, state });
+
+  response.redirect(url);
 });
 
 exports.callback = functions.https.onRequest((request, response) => {});
